@@ -2,74 +2,115 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Simple Image AI</title>
+<title>AI Vision + Chat</title>
 <style>
-    body {
-        font-family: Arial, sans-serif;
-        background: #111;
-        color: white;
-        text-align: center;
-        padding: 20px;
-    }
-    canvas {
-        margin-top: 10px;
-        border: 2px solid white;
-        max-width: 90%;
-    }
+body {
+    background:#0f172a;
+    color:white;
+    font-family:Arial;
+    text-align:center;
+}
+#chat {
+    width:90%;
+    max-width:600px;
+    margin:auto;
+    background:#020617;
+    padding:10px;
+    border-radius:10px;
+}
+#messages {
+    height:250px;
+    overflow-y:auto;
+    text-align:left;
+    padding:5px;
+}
+input, button {
+    padding:8px;
+    margin:5px;
+}
+canvas {
+    border:2px solid white;
+    margin-top:10px;
+}
+.user { color:#38bdf8 }
+.ai { color:#a7f3d0 }
 </style>
 </head>
 <body>
 
-<h1>🧠 Simple Image AI</h1>
-<p>Upload an image and the AI will "see" it</p>
+<h1>🧠 AI Vision + Web Chat</h1>
 
-<input type="file" accept="image/*" id="upload">
-<br><br>
-
+<input type="file" id="upload" accept="image/*"><br>
 <canvas id="canvas"></canvas>
 
-<p id="result"></p>
+<div id="chat">
+    <div id="messages"></div>
+    <input id="input" placeholder="Ask the AI..." size="40">
+    <button onclick="send()">Send</button>
+</div>
 
 <script>
-const upload = document.getElementById("upload");
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
-const result = document.getElementById("result");
+const messages = document.getElementById("messages");
 
-upload.addEventListener("change", function () {
-    const file = upload.files[0];
-    if (!file) return;
+function addMessage(text, cls){
+    const div = document.createElement("div");
+    div.className = cls;
+    div.textContent = text;
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+}
 
+// IMAGE VISION
+document.getElementById("upload").addEventListener("change", e => {
     const img = new Image();
     img.onload = () => {
         canvas.width = img.width;
         canvas.height = img.height;
-        ctx.drawImage(img, 0, 0);
-
-        analyzeImage();
+        ctx.drawImage(img,0,0);
+        addMessage("AI: Image loaded. I can see pixels 👀","ai");
     };
-    img.src = URL.createObjectURL(file);
+    img.src = URL.createObjectURL(e.target.files[0]);
 });
 
-function analyzeImage() {
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const data = imageData.data;
+// CHAT + WEB SCAN
+async function send(){
+    const input = document.getElementById("input");
+    const text = input.value;
+    if(!text) return;
+    addMessage("You: " + text,"user");
+    input.value="";
 
-    let brightness = 0;
+    addMessage("AI: Scanning the web...","ai");
 
-    for (let i = 0; i < data.length; i += 4) {
-        brightness += (data[i] + data[i+1] + data[i+2]) / 3;
-    }
+    /*
+    🔴 IMPORTANT
+    Browsers CANNOT scan the web directly.
+    You must use an API or backend.
 
-    brightness /= (data.length / 4);
+    Example APIs:
+    - Bing Search API
+    - Google Custom Search
+    - OpenAI with browsing enabled
 
-    let description = brightness > 130 ? "The image looks bright ☀️" : "The image looks dark 🌙";
+    Below is TEMPLATE code.
+    */
 
-    result.innerHTML = `
-        📏 Size: ${canvas.width} x ${canvas.height}<br>
-        💡 Brightness: ${brightness.toFixed(1)}<br>
-        🧠 AI says: ${description}
-    `;
+    /*
+    const response = await fetch("YOUR_SERVER_ENDPOINT", {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({ query:text })
+    });
+    const data = await response.json();
+    addMessage("AI: " + data.answer,"ai");
+    */
+
+    // TEMP FAKE RESPONSE (for now)
+    setTimeout(()=>{
+        addMessage("AI: I need a web API to answer that.","ai");
+    },1000);
 }
 </script>
 
